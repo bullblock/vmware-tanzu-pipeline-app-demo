@@ -130,6 +130,8 @@ jobs:
             kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://cls1-api.wdc.lab --tanzu-kubernetes-cluster-namespace=app-demo --insecure-skip-tls-verify
             kubectl config use-context app-demo
             kubectl get tkc -n app-demo
+            sleep 6m
+            kubectl get tkc -n app-demo
 
 - name: deploy-demo-apps
   serial: true
@@ -146,7 +148,6 @@ jobs:
         args:
           - -c
           - |
-            sleep 6m
             export KUBECTL_VSPHERE_PASSWORD='Admin!23Admin'
             kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://cls1-api.wdc.lab --tanzu-kubernetes-cluster-namespace=app-demo --tanzu-kubernetes-cluster-name=app-demo-cluster --insecure-skip-tls-verify
             kubectl config use-context app-demo-cluster
@@ -157,4 +158,3 @@ jobs:
             sleep 3m
             kubectl get svc front-end -n sock-shop
 
-             
