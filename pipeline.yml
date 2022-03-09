@@ -1,0 +1,160 @@
+---
+#
+# task define
+#
+task-config: &task-config
+  inputs:
+    - name: deployment
+  platform: linux
+  image_resource:
+    type: registry-image
+    source:
+      repository: powellcrack/concourse-tanzu-wcp-console
+      tag: latest
+
+#
+# Resources
+#
+resources:
+
+- name: concourse-tanzu-wcp-console
+  type: registry-image
+  icon: docker
+  source:
+    repository: powellcrack/concourse-tanzu-wcp-console
+    tag: latest
+
+- name: deployment
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/bullblock/vmware-tanzu-pipeline-app-demo.git
+    branch: main
+  check_every: 1m
+
+#
+# Jobs
+#
+jobs:
+
+- name: ping-api-server
+  serial: true
+  plan:
+  - get: deployment
+  - get: concourse-tanzu-wcp-console
+    trigger: true
+  - task: ping-api-server
+    config:
+      << : *task-config
+      run:
+        path: ping
+        args: ["-c","5","cls1-api.wdc.lab"]
+
+- name: api-server-authentication
+  serial: true
+  plan:
+  - get: deployment
+  - get: concourse-tanzu-wcp-console
+    passed: [ping-api-server]
+    trigger: true
+  - task: api-server-authentication
+    config:
+      << : *task-config
+      run:
+        path: /bin/bash
+        args:  
+          - -c
+          - |
+            export KUBECTL_VSPHERE_PASSWORD='Admin!23Admin'
+            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://cls1-api.wdc.lab --tanzu-kubernetes-cluster-namespace=app-demo --insecure-skip-tls-verify
+        
+- name: workload-clusters-operation
+  serial: true
+  plan: 
+  - get: deployment
+  - get: concourse-tanzu-wcp-console
+    passed: [api-server-authentication]
+    trigger: true
+  - task: workload-clusters-operation
+    config:
+      << : *task-config
+      run:
+        path: /bin/bash
+        args:
+          - -c
+          - |
+            export KUBECTL_VSPHERE_PASSWORD='Admin!23Admin'
+            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://cls1-api.wdc.lab --tanzu-kubernetes-cluster-namespace=app-demo --insecure-skip-tls-verify
+            kubectl config use-context app-demo
+            kubectl get tkc -n app-demo | awk '{print $1}' | awk '{if(NR>1)print}' |sort - > existing
+            grep -i name: deployment/app-demo.yml | awk '{print $2}' | sort - > applying
+            while read existing; do
+            {
+              item=`grep -i "$existing" applying`
+              if [ ! -n "$item" ]; then
+                echo $existing >> delete.list
+              fi
+            }
+            done < existing
+            if [ -s delete.list ]; then
+              while read deleteing; do
+              {
+                kubectl delete tkc/"$deleteing" -n app-demo
+                if [ -s deployment/app-demo.yml ]; then
+                  kubectl apply -f deployment/app-demo.yml
+                fi
+              }
+              done < delete.list
+            else
+              if [ -s deployment/app-demo.yml ]; then
+                kubectl apply -f deployment/app-demo.yml
+              fi
+            fi
+
+- name: workload-clusters-verify
+  serial: true
+  plan:
+  - get: deployment
+  - get: concourse-tanzu-wcp-console
+    passed: [workload-clusters-operation]
+    trigger: true
+  - task: workload-clusters-verify
+    config:
+      << : *task-config
+      run:
+        path: /bin/bash
+        args:
+          - -c
+          - |
+            export KUBECTL_VSPHERE_PASSWORD='Admin!23Admin'
+            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://cls1-api.wdc.lab --tanzu-kubernetes-cluster-namespace=app-demo --insecure-skip-tls-verify
+            kubectl config use-context app-demo
+            kubectl get tkc -n app-demo
+
+- name: deploy-demo-apps
+  serial: true
+  plan:
+  - get: deployment
+  - get: concourse-tanzu-wcp-console
+    passed: [workload-clusters-verify]
+    trigger: true
+  - task: deploy-demo-apps
+    config:
+      << : *task-config
+      run:
+        path: /bin/bash
+        args:
+          - -c
+          - |
+            sleep 10m
+            export KUBECTL_VSPHERE_PASSWORD='Admin!23Admin'
+            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://cls1-api.wdc.lab --tanzu-kubernetes-cluster-namespace=app-demo --tanzu-kubernetes-cluster-name=app-demo-cluster --insecure-skip-tls-verify
+            kubectl config use-context app-demo-cluster
+            kubectl get nodes -o wide
+            cd deployment
+            ./app-demo.sh
+            kubectl apply -f deployment/app-demo/deploy/kubernetes/complete-demo.yaml -n sock-shop
+            sleep 5m
+            kubectl get svc -n sock-shop
+
+             
