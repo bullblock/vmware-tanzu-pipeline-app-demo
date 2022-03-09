@@ -155,6 +155,7 @@ jobs:
             cd deployment
             ./app-demo.sh
             kubectl apply -f app-demo/deploy/kubernetes/complete-demo.yaml -n sock-shop
+            kubectl get svc front-end -n sock-shop
             sleep 3m
             kubectl get svc front-end -n sock-shop
 
