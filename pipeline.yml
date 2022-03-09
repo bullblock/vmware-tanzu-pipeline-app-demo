@@ -146,7 +146,7 @@ jobs:
         args:
           - -c
           - |
-            sleep 10m
+            sleep 6m
             export KUBECTL_VSPHERE_PASSWORD='Admin!23Admin'
             kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://cls1-api.wdc.lab --tanzu-kubernetes-cluster-namespace=app-demo --tanzu-kubernetes-cluster-name=app-demo-cluster --insecure-skip-tls-verify
             kubectl config use-context app-demo-cluster
