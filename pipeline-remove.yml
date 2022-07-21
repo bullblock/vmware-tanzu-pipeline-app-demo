@@ -1,0 +1,112 @@
+---
+#
+# task define
+#
+task-config: &task-config
+  inputs:
+    - name: deployment
+  platform: linux
+  image_resource:
+    type: registry-image
+    source:
+      repository: powellcrack/concourse-tanzu-wcp-console
+      tag: latest
+
+#
+# Resources
+#
+resources:
+
+- name: concourse-tanzu-wcp-console
+  type: registry-image
+  icon: docker
+  source:
+    repository: powellcrack/concourse-tanzu-wcp-console
+    tag: latest
+
+- name: deployment
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/bullblock/vmware-tanzu-pipeline-app-demo.git
+    branch: main
+  check_every: 1m
+
+#
+# Jobs
+#
+jobs:
+
+- name: ping-api-server
+  serial: true
+  plan:
+  - get: deployment
+  - get: concourse-tanzu-wcp-console
+    trigger: true
+  - task: ping-api-server
+    config:
+      << : *task-config
+      run:
+        path: ping
+        args: ["-c","5","wcp.tanzulab.io"]
+
+- name: api-server-authentication
+  serial: true
+  plan:
+  - get: deployment
+  - get: concourse-tanzu-wcp-console
+    passed: [ping-api-server]
+    trigger: true
+  - task: api-server-authentication
+    config:
+      << : *task-config
+      run:
+        path: /bin/bash
+        args:  
+          - -c
+          - |
+            export KUBECTL_VSPHERE_PASSWORD='Admin!23Admin'
+            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://wcp.tanzulab.io --tanzu-kubernetes-cluster-namespace=app-demo --insecure-skip-tls-verify
+        
+- name: workload-clusters-deletion
+  serial: true
+  plan: 
+  - get: deployment
+  - get: concourse-tanzu-wcp-console
+    passed: [api-server-authentication]
+    trigger: true
+  - task: workload-clusters-operation
+    config:
+      << : *task-config
+      run:
+        path: /bin/bash
+        args:
+          - -c
+          - |
+            export KUBECTL_VSPHERE_PASSWORD='Admin!23Admin'
+            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://wcp.tanzulab.io --insecure-skip-tls-verify
+            kubectl config use-context wcp.tanzulab.io
+            kubectl delete tkc/app-demo-cluster -n app-demo
+
+- name: workload-clusters-verify
+  serial: true
+  plan:
+  - get: deployment
+  - get: concourse-tanzu-wcp-console
+    passed: [workload-clusters-operation]
+    trigger: true
+  - task: workload-clusters-verify
+    config:
+      << : *task-config
+      run:
+        path: /bin/bash
+        args:
+          - -c
+          - |
+            export KUBECTL_VSPHERE_PASSWORD='Admin!23Admin'
+            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://wcp.tanzulab.io --tanzu-kubernetes-cluster-namespace=app-demo --insecure-skip-tls-verify
+            kubectl config use-context wcp.tanzulab.io
+            kubectl get tkc -A
+            sleep 6m
+            kubectl get tkc -A
+
