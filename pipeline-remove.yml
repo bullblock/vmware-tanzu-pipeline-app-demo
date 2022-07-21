@@ -93,7 +93,7 @@ jobs:
   plan:
   - get: deployment
   - get: concourse-tanzu-wcp-console
-    passed: [workload-clusters-operation]
+    passed: [workload-clusters-deletion]
     trigger: true
   - task: workload-clusters-verify
     config:
