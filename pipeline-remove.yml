@@ -107,6 +107,4 @@ jobs:
             kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://wcp.tanzulab.io --tanzu-kubernetes-cluster-namespace=app-demo --insecure-skip-tls-verify
             kubectl config use-context wcp.tanzulab.io
             kubectl get tkc -A
-            sleep 6m
-            kubectl get tkc -A
 
