@@ -41,8 +41,8 @@ jobs:
   serial: true
   plan:
   - get: deployment
-  - get: concourse-tanzu-wcp-console
     trigger: true
+  - get: concourse-tanzu-wcp-console
   - task: ping-api-server
     config:
       << : *task-config
@@ -54,9 +54,9 @@ jobs:
   serial: true
   plan:
   - get: deployment
+    trigger: true
   - get: concourse-tanzu-wcp-console
     passed: [ping-api-server]
-    trigger: true
   - task: api-server-authentication
     config:
       << : *task-config
@@ -72,9 +72,9 @@ jobs:
   serial: true
   plan: 
   - get: deployment
+    trigger: true
   - get: concourse-tanzu-wcp-console
     passed: [api-server-authentication]
-    trigger: true
   - task: workload-clusters-operation
     config:
       << : *task-config
@@ -115,9 +115,9 @@ jobs:
   serial: true
   plan:
   - get: deployment
+    trigger: true
   - get: concourse-tanzu-wcp-console
     passed: [workload-clusters-operation]
-    trigger: true
   - task: workload-clusters-verify
     config:
       << : *task-config
@@ -137,9 +137,9 @@ jobs:
   serial: true
   plan:
   - get: deployment
+    trigger: true
   - get: concourse-tanzu-wcp-console
     passed: [workload-clusters-verify]
-    trigger: true
   - task: deploy-demo-apps
     config:
       << : *task-config
@@ -156,6 +156,6 @@ jobs:
             ./app-demo.sh
             kubectl apply -f app-demo/deploy/kubernetes/complete-demo.yaml -n sock-shop
             kubectl get svc front-end -n sock-shop
-            sleep 6m
+            sleep 5m
             kubectl get svc front-end -n sock-shop
 
