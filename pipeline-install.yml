@@ -48,7 +48,7 @@ jobs:
       << : *task-config
       run:
         path: ping
-        args: ["-c","5","wcp.tanzulab.io"]
+        args: ["-c","5","kapi.wcp.tanzulab.io"]
 
 - name: api-server-authentication
   serial: true
@@ -66,7 +66,7 @@ jobs:
           - -c
           - |
             export KUBECTL_VSPHERE_PASSWORD='Admin!23Admin'
-            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://wcp.tanzulab.io --tanzu-kubernetes-cluster-namespace=app-demo --insecure-skip-tls-verify
+            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://kapi.wcp.tanzulab.io --tanzu-kubernetes-cluster-namespace=app-demo --insecure-skip-tls-verify
         
 - name: workload-clusters-operation
   serial: true
@@ -84,7 +84,7 @@ jobs:
           - -c
           - |
             export KUBECTL_VSPHERE_PASSWORD='Admin!23Admin'
-            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://wcp.tanzulab.io --tanzu-kubernetes-cluster-namespace=app-demo --insecure-skip-tls-verify
+            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://kapi.wcp.tanzulab.io --tanzu-kubernetes-cluster-namespace=app-demo --insecure-skip-tls-verify
             kubectl config use-context app-demo
             kubectl get tkc -n app-demo | awk '{print $1}' | awk '{if(NR>1)print}' |sort - > existing
             grep -i name: deployment/app-demo.yml | awk '{print $2}' | sort - > applying
@@ -127,7 +127,7 @@ jobs:
           - -c
           - |
             export KUBECTL_VSPHERE_PASSWORD='Admin!23Admin'
-            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://wcp.tanzulab.io --tanzu-kubernetes-cluster-namespace=app-demo --insecure-skip-tls-verify
+            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://kapi.wcp.tanzulab.io --tanzu-kubernetes-cluster-namespace=app-demo --insecure-skip-tls-verify
             kubectl config use-context app-demo
             kubectl get tkc -n app-demo
             sleep 6m
@@ -149,7 +149,7 @@ jobs:
           - -c
           - |
             export KUBECTL_VSPHERE_PASSWORD='Admin!23Admin'
-            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://wcp.tanzulab.io --tanzu-kubernetes-cluster-namespace=app-demo --tanzu-kubernetes-cluster-name=app-demo-cluster --insecure-skip-tls-verify
+            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://kapi.wcp.tanzulab.io --tanzu-kubernetes-cluster-namespace=app-demo --tanzu-kubernetes-cluster-name=app-demo-cluster --insecure-skip-tls-verify
             kubectl config use-context app-demo-cluster
             kubectl get nodes -o wide
             cd deployment

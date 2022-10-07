@@ -8,7 +8,7 @@ spec:
     controlPlane:
       replicas: 1
       vmClass: guaranteed-medium
-      storageClass: dc2-cls2-ds2
+      storageClass: dc1-cls1-ds1
       volumes:
         - name: etcd
           mountPath: /var/lib/etcd
@@ -16,12 +16,12 @@ spec:
             storage: 16Gi
       tkr:
         reference:
-          name: v1.21.6---vmware.1-tkg.1.b3d708a
+          name: v1.22.9---vmware.1-tkg.1.cc71bc8
     nodePools:
     - name: app-demo-cluster-node-pool-1
       replicas: 1
       vmClass: guaranteed-large
-      storageClass: dc2-cls2-ds2
+      storageClass: dc1-cls1-ds1
       volumes:
         - name: containerd
           mountPath: /var/lib/containerd
@@ -29,10 +29,10 @@ spec:
             storage: 64Gi
       tkr:
         reference:
-          name: v1.21.6---vmware.1-tkg.1.b3d708a
+          name: v1.22.9---vmware.1-tkg.1.cc71bc8
   settings:
     storage:
-      defaultClass: dc2-cls2-ds2
+      defaultClass: dc1-cls1-ds1
     network:
       cni:
         name: antrea
