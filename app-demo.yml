@@ -18,7 +18,7 @@ spec:
         reference:
           name: v1.22.9---vmware.1-tkg.1.cc71bc8
     nodePools:
-    - name: app-demo-cluster-node-pool-1
+    - name: node-pool-1
       replicas: 1
       vmClass: guaranteed-large
       storageClass: dc1-cls1-ds1
