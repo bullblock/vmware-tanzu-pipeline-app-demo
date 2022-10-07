@@ -48,7 +48,7 @@ jobs:
       << : *task-config
       run:
         path: ping
-        args: ["-c","5","wcp.tanzulab.io"]
+        args: ["-c","5","kapi.wcp.tanzulab.io"]
 
 - name: api-server-authentication
   serial: true
@@ -66,7 +66,7 @@ jobs:
           - -c
           - |
             export KUBECTL_VSPHERE_PASSWORD='Admin!23Admin'
-            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://wcp.tanzulab.io --tanzu-kubernetes-cluster-namespace=app-demo --insecure-skip-tls-verify
+            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://kapi.wcp.tanzulab.io --tanzu-kubernetes-cluster-namespace=app-demo --insecure-skip-tls-verify
         
 - name: workload-clusters-deletion
   serial: true
@@ -84,8 +84,8 @@ jobs:
           - -c
           - |
             export KUBECTL_VSPHERE_PASSWORD='Admin!23Admin'
-            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://wcp.tanzulab.io --insecure-skip-tls-verify
-            kubectl config use-context wcp.tanzulab.io
+            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://kapi.wcp.tanzulab.io --insecure-skip-tls-verify
+            kubectl config use-context kapi.wcp.tanzulab.io
             kubectl delete tkc/app-demo-cluster -n app-demo
 
 - name: workload-clusters-verify
@@ -104,7 +104,7 @@ jobs:
           - -c
           - |
             export KUBECTL_VSPHERE_PASSWORD='Admin!23Admin'
-            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://wcp.tanzulab.io --tanzu-kubernetes-cluster-namespace=app-demo --insecure-skip-tls-verify
-            kubectl config use-context wcp.tanzulab.io
+            kubectl vsphere login --vsphere-username=administrator@vsphere.local --server=https://kapi.wcp.tanzulab.io --tanzu-kubernetes-cluster-namespace=app-demo --insecure-skip-tls-verify
+            kubectl config use-context kapi.wcp.tanzulab.io
             kubectl get tkc -A
 
