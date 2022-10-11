@@ -54,9 +54,9 @@ jobs:
   serial: true
   plan:
   - get: deployment
+  - get: concourse-tanzu-wcp-console
     trigger: true
     passed: [ping-api-server]
-  - get: concourse-tanzu-wcp-console
   - task: api-server-authentication
     config:
       << : *task-config
@@ -72,9 +72,9 @@ jobs:
   serial: true
   plan: 
   - get: deployment
+  - get: concourse-tanzu-wcp-console
     trigger: true
     passed: [api-server-authentication]
-  - get: concourse-tanzu-wcp-console
   - task: workload-clusters-operation
     config:
       << : *task-config
@@ -115,9 +115,9 @@ jobs:
   serial: true
   plan:
   - get: deployment
+  - get: concourse-tanzu-wcp-console
     trigger: true
     passed: [workload-clusters-operation]
-  - get: concourse-tanzu-wcp-console
   - task: workload-clusters-verify
     config:
       << : *task-config
@@ -137,9 +137,9 @@ jobs:
   serial: true
   plan:
   - get: deployment
+  - get: concourse-tanzu-wcp-console
     trigger: true
     passed: [workload-clusters-verify]
-  - get: concourse-tanzu-wcp-console
   - task: deploy-demo-apps
     config:
       << : *task-config
